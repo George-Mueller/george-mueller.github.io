@@ -53,7 +53,10 @@
       "titulo": "VSL Memória (trecho)",
       "nicho": "vsl",
       "thumb": "assets/thumbs/vsl-memoria.webp",
-      "previa": null,
+      "previa": {
+        "mp4": "assets/previas/vsl-memoria.mp4",
+        "webm": "assets/previas/vsl-memoria.webm"
+      },
       "link": "https://youtu.be/0K-Tp2hwm1I",
       "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
       "ordem": 4,

@@ -1,2 +1,3 @@
-Coloque aqui a sua foto com o nome foto.webp (retrato, proporção 4:5, ~800x1000 px).
-Sem esse arquivo, o site mostra um avatar com as iniciais "GM".
+foto.webp (+ foto.jpg de fallback): versão tratada da foto do George — recorte 4:5 no rosto,
+800x1000, SEM metadados (EXIF/GPS/data/câmera). O original nunca entra no repositório.
+Para trocar: gerar uma nova versão tratada com o mesmo nome e conferir que não tem EXIF.

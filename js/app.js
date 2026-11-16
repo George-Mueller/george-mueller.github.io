@@ -23,13 +23,6 @@
   if (hero && window.FundoHero) window.FundoHero.montar(hero);
 
   /* ---------- Foto (só se existir assets/eu/foto.webp) ---------- */
-  const foto = $("foto-eu");
-  if (foto) {
-    const avatar = $("avatar-eu");
-    foto.addEventListener("load", () => { foto.hidden = false; avatar.hidden = true; });
-    foto.addEventListener("error", () => foto.remove());
-    foto.loading = "eager";
-  }
 
   /* ---------- Contato ---------- */
   fetch("dados/contato.json", { cache: "no-cache" })

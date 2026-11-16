@@ -123,14 +123,12 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
 .sobre { display: grid; gap: 40px; }
 @media (min-width: 900px) { .sobre { grid-template-columns: 5fr 7fr; gap: 72px; align-items: start; } }
 .sobre-foto { margin: 0; max-width: 420px; }
-.sobre-foto img, .avatar {
-  width: 100%; aspect-ratio: 4 / 5; border-radius: var(--raio); object-fit: cover;
-}
-.avatar {
-  display: grid; place-items: center;
-  font: 700 clamp(4rem, 22vw, 8rem) var(--fonte-titulo); letter-spacing: -0.05em; color: var(--texto);
-  border: 1px solid var(--borda);
-  background: radial-gradient(circle at 100% 0%, rgba(var(--brilho-rgb), .35), transparent 65%), var(--superficie);
+/* foto: borda sutil + leve brilho Jade, como os cards */
+.sobre-foto img {
+  display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover;
+  border-radius: var(--raio); background: var(--superficie);
+  border: 1px solid var(--borda-forte);
+  box-shadow: 0 0 0 1px rgba(var(--destaque-rgb), .18), 0 14px 44px rgba(var(--destaque-rgb), .16);
 }
 .sobre-texto p { color: var(--texto-2); margin: 0 0 16px; max-width: 60ch; }
 .sobre-texto .destaque-texto { color: var(--texto); font: 500 clamp(1.3rem, 4vw, 1.7rem)/1.3 var(--fonte-titulo); letter-spacing: -0.01em; margin-bottom: 22px; }

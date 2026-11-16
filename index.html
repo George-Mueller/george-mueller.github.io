@@ -62,8 +62,10 @@
     <section id="sobre" class="secao">
       <div class="container sobre">
         <figure class="sobre-foto">
-          <img id="foto-eu" src="assets/eu/foto.webp" alt="Foto de George Mueller" width="480" height="600" loading="lazy" hidden>
-          <div class="avatar" id="avatar-eu" aria-hidden="true">GM</div>
+          <picture>
+            <source srcset="assets/eu/foto.webp" type="image/webp">
+            <img src="assets/eu/foto.jpg" alt="George Mueller" width="800" height="1000" loading="lazy" decoding="async">
+          </picture>
         </figure>
         <div class="sobre-texto">
           <h2 class="titulo-secao"><span>01</span> Sobre mim</h2>
