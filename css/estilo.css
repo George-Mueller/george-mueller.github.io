@@ -103,7 +103,7 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
   font-weight: 800; font-stretch: 75%;
   font-variation-settings: "wdth" 75, "opsz" 96;
   font-size: clamp(4.4rem, 29vw, 13.5rem);
-  line-height: 0.84; letter-spacing: -0.025em;
+  line-height: 0.84; letter-spacing: 0;
   text-transform: uppercase;
 }
 .hero-linha {
