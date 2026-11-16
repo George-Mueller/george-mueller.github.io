@@ -92,9 +92,18 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
   margin: 0 0 18px; color: var(--texto-2);
   font: 500 0.85rem var(--fonte-titulo); letter-spacing: 0.22em; text-transform: uppercase;
 }
+/* nome do hero: Bricolage Grotesque ExtraBold condensada (OFL), woff2 local, só o peso 800 */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../assets/fontes/bricolage-grotesque-800.woff2") format("woff2");
+  font-weight: 800; font-stretch: 75% 100%; font-display: swap;
+}
 .hero-nome {
-  font-size: clamp(3.6rem, 17vw, 10.5rem);
-  font-weight: 700; line-height: 0.88; letter-spacing: -0.045em;
+  font-family: "Bricolage Grotesque", var(--fonte-titulo);
+  font-weight: 800; font-stretch: 75%;
+  font-variation-settings: "wdth" 75, "opsz" 96;
+  font-size: clamp(4.4rem, 29vw, 13.5rem);
+  line-height: 0.84; letter-spacing: -0.025em;
   text-transform: uppercase;
 }
 .hero-linha {
