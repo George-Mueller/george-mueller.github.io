@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- Molde da imagem Open Graph (1200x630). Para regenerar, com o servidor local rodando na raiz do site:
+     chrome --headless --hide-scrollbars --window-size=1200,630 --screenshot=assets/og.png http://localhost:8000/ferramentas/og.html
+     (?icone=1 gera o apple-touch-icon com --window-size=180,180) -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #0d1512; color: #eceeed; font-family: "Space Grotesk", sans-serif; }
+  .og { position: relative; width: 1200px; height: 630px; box-sizing: border-box; padding: 72px 80px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .og::before { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 95% 120% at 100% 0%, rgba(41,163,131,.55), rgba(15,46,34,.6) 40%, transparent 72%); }
+  .og::after { content: ""; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 48px 48px; }
+  .tag { position: relative; z-index: 1; color: #adb5b2; font-size: 26px; letter-spacing: .22em; text-transform: uppercase; font-weight: 500; margin-bottom: 18px; }
+  h1 { position: relative; z-index: 1; margin: 0; font-size: 150px; line-height: .86; letter-spacing: -.045em; text-transform: uppercase; font-weight: 700; }
+  p { position: relative; z-index: 1; margin: 30px 0 0; font-size: 38px; color: #adb5b2; }
+  p b { color: #eceeed; font-weight: 500; }
+  .icone { display: none; }
+  body.ic { width: 180px; height: 180px; }
+  body.ic .og { display: none; }
+  body.ic .icone { display: grid; place-items: center; width: 180px; height: 180px; background: #0d1512; font-weight: 700; font-size: 84px; letter-spacing: -.06em; }
+  body.ic .icone span { color: #1fd8a4; }
+</style>
+</head>
+<body>
+  <div class="og">
+    <div class="tag">Portfólio</div>
+    <h1>George<br>Mueller</h1>
+    <p>Editor de vídeo: <b>VSL</b>, <b>animação</b>, <b>motion graphics</b></p>
+  </div>
+  <div class="icone">GM<span>.</span></div>
+  <script>if (location.search.includes("icone")) document.body.classList.add("ic");</script>
+</body>
+</html>

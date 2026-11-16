@@ -1,0 +1,32 @@
+/* Escala dark da Radix Colors v3 (@radix-ui/colors 3.0.0): Jade (acento) + Sage (neutros, par do Jade).
+
+   Uso dos passos (convenção Radix):
+   1 fundo · 2 superfície · 3 superfície elevada/hover · 6 borda sutil · 7 borda · 8 borda hover
+   9 cor sólida (botões) · 10 sólida hover · 11 texto/links em cor · 12 texto de alto contraste */
+
+:root {
+  --a1: #0d1512; --a2: #121c18; --a3: #0f2e22; --a4: #0b3b2c; --a5: #114837; --a6: #1b5745;
+  --a7: #246854; --a8: #2a7e68; --a9: #29a383; --a10: #27b08b; --a11: #1fd8a4; --a12: #adf0d4;
+  --a1-rgb: 13, 21, 18; --a9-rgb: 41, 163, 131; --a11-rgb: 31, 216, 164;
+  --n11: #adb5b2; --n12: #eceeed;  /* sage */
+}
+
+:root {
+  /* tokens do site (contraste medido: texto 15.9:1 · texto-2 8.8:1 · links 10.1:1 · botão 5.9:1) */
+  --fundo: var(--a1);               /* passo 1: quase preto esverdeado */
+  --fundo-rgb: var(--a1-rgb);
+  --superficie: var(--a2);
+  --superficie-2: var(--a3);
+  --borda: var(--a6);
+  --borda-forte: var(--a8);
+  --brilho: var(--a9);
+  --brilho-rgb: var(--a9-rgb);
+  --destaque: var(--a9);            /* fundo de botão / filtro ativo */
+  --destaque-hover: var(--a10);
+  --destaque-rgb: var(--a9-rgb);
+  --no-destaque: var(--a1);         /* texto sobre o botão */
+  --link: var(--a11);
+  --link-rgb: var(--a11-rgb);
+  --texto: var(--n12);
+  --texto-2: var(--n11);
+}

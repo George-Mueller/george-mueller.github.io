@@ -1,0 +1,2 @@
+Coloque aqui a sua foto com o nome foto.webp (retrato, proporção 4:5, ~800x1000 px).
+Sem esse arquivo, o site mostra um avatar com as iniciais "GM".

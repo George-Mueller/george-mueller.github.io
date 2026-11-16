@@ -1,0 +1,91 @@
+{
+  "trabalhos": [
+    {
+      "id": "linhameta",
+      "titulo": "LinhaMeta",
+      "nicho": "motion",
+      "thumb": "assets/thumbs/linhameta.webp",
+      "previa": {
+        "mp4": "assets/previas/linhameta.mp4",
+        "webm": "assets/previas/linhameta.webm"
+      },
+      "link": "https://youtube.com/shorts/_L6373hvfHw",
+      "descricao": "Peça autoral: motion graphics, tipografia animada e acabamento.",
+      "ordem": 1,
+      "destaque_home": true,
+      "ativo": true,
+      "vertical": true
+    },
+    {
+      "id": "jorginho-ep02",
+      "titulo": "Cadê o Jorginho? — Ep. 2",
+      "nicho": "canal",
+      "thumb": "assets/thumbs/jorginho-ep02.webp",
+      "previa": {
+        "mp4": "assets/previas/jorginho-ep02.mp4",
+        "webm": "assets/previas/jorginho-ep02.webm"
+      },
+      "link": "https://youtube.com/shorts/gju-oVim-uw",
+      "descricao": "Série autoral do canal: roteiro, animação 2D e edição.",
+      "ordem": 2,
+      "destaque_home": false,
+      "ativo": true,
+      "vertical": true
+    },
+    {
+      "id": "jorginho-ep03",
+      "titulo": "Cadê o Jorginho? — Ep. 3",
+      "nicho": "canal",
+      "thumb": "assets/thumbs/jorginho-ep03.webp",
+      "previa": {
+        "mp4": "assets/previas/jorginho-ep03.mp4",
+        "webm": "assets/previas/jorginho-ep03.webm"
+      },
+      "link": "https://youtube.com/shorts/Ov5_gLlFXJ4",
+      "descricao": "Série autoral do canal: roteiro, animação 2D e edição.",
+      "ordem": 3,
+      "destaque_home": true,
+      "ativo": true,
+      "vertical": true
+    },
+    {
+      "id": "vsl-memoria",
+      "titulo": "VSL Memória (trecho)",
+      "nicho": "vsl",
+      "thumb": "assets/thumbs/vsl-memoria.webp",
+      "previa": null,
+      "link": "https://youtu.be/0K-Tp2hwm1I",
+      "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
+      "ordem": 4,
+      "destaque_home": true,
+      "ativo": true,
+      "vertical": false
+    },
+    {
+      "id": "vsl-memoria-2",
+      "titulo": "VSL Memória 2 (trecho)",
+      "nicho": "vsl",
+      "thumb": "assets/thumbs/vsl-memoria-2.webp",
+      "previa": null,
+      "link": "https://youtu.be/vpVaCOtmCrA",
+      "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
+      "ordem": 5,
+      "destaque_home": false,
+      "ativo": true,
+      "vertical": false
+    },
+    {
+      "id": "vsl-emagrecimento",
+      "titulo": "VSL Emagrecimento (trecho)",
+      "nicho": "vsl",
+      "thumb": "assets/thumbs/vsl-emagrecimento.webp",
+      "previa": null,
+      "link": "https://youtu.be/ZYYVRTV2mrA",
+      "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
+      "ordem": 6,
+      "destaque_home": false,
+      "ativo": true,
+      "vertical": false
+    }
+  ]
+}

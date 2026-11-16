@@ -1,0 +1,20 @@
+# Regras locais (citam caminhos da máquina) — não sobem
+CLAUDE.md
+.claude/
+
+# Vídeo completo nunca entra no repositório; prévias ficam em assets/previas/
+*.mov
+*.mkv
+*.avi
+*.prproj
+*.aep
+/*.mp4
+/*.webm
+
+# Lixo do sistema / Python
+Thumbs.db
+desktop.ini
+.DS_Store
+__pycache__/
+*.pyc
+.env
