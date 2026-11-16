@@ -61,6 +61,16 @@
     const { webm, mp4 } = video.dataset;
     if (webm) { const s = document.createElement("source"); s.src = webm; s.type = "video/webm"; video.append(s); }
     if (mp4) { const s = document.createElement("source"); s.src = mp4; s.type = "video/mp4"; video.append(s); }
+    // se o webm falhar na decodificação (ex.: decodificador de hardware), cai para o mp4
+    video.addEventListener("error", () => {
+      if (mp4 && !video.dataset.usandoMp4) {
+        video.dataset.usandoMp4 = "1";
+        video.querySelectorAll("source").forEach((s) => s.remove());
+        video.src = mp4;
+        const card = video.closest(".card");
+        if (card && card.classList.contains("tocando")) video.play().catch(() => {});
+      }
+    });
     video.load();
   };
   // a prévia é ação do visitante (hover/toque): toca mesmo com movimento reduzido

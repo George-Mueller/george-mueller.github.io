@@ -41,6 +41,7 @@ import unicodedata
 import urllib.parse
 import urllib.request
 from pathlib import Path
+from datetime import datetime
 
 RAIZ = Path(__file__).resolve().parent.parent
 ARQ_TRABALHOS = RAIZ / "dados" / "trabalhos.json"
@@ -55,6 +56,8 @@ NICHOS = {
     "gameplay": "gameplay", "game": "gameplay", "games": "gameplay",
 }
 LIMITE_BYTES = 3 * 1024 * 1024  # 3 MB
+# versão no caminho (?v=) para o navegador não usar a prévia/thumb antiga do cache
+VERSAO = datetime.now().strftime("%Y%m%d%H%M")
 AMOSTRAS_POR_SEG = 4  # resolução da análise de movimento
 
 
@@ -380,14 +383,14 @@ def main() -> None:
         gerar_webm(video, ini, dur, escala, webm)
         if not (a.manter_thumb and thumb_rel):
             gerar_thumb(video, ini, dur, w, h, thumb)
-            thumb_rel = f"assets/thumbs/{thumb.name}"
-        previa = {"mp4": f"assets/previas/{mp4.name}", "webm": f"assets/previas/{webm.name}"}
+            thumb_rel = f"assets/thumbs/{thumb.name}?v={VERSAO}"
+        previa = {"mp4": f"assets/previas/{mp4.name}?v={VERSAO}", "webm": f"assets/previas/{webm.name}?v={VERSAO}"}
     elif not thumb_rel:
         vid = id_youtube(link)
         if not vid:
             sys.exit("Erro: sem vídeo local, o link precisa ser do YouTube (para baixar a thumb).")
         if thumb_do_youtube(vid, bool(vertical), thumb):
-            thumb_rel = f"assets/thumbs/{thumb.name}"
+            thumb_rel = f"assets/thumbs/{thumb.name}?v={VERSAO}"
 
     destaque = a.destaque or bool(base.get("destaque_home"))
     if a.destaque:  # só um destaque por nicho

@@ -54,7 +54,7 @@ def main() -> None:
     if a.apagar:
         caminhos = [t.get("thumb"), *(t.get("previa") or {}).values()]
         for c in filter(None, caminhos):
-            p = (RAIZ / c).resolve()
+            p = (RAIZ / c.split("?")[0]).resolve()  # ignora o ?v= de versão
             if RAIZ in p.parents and p.exists():
                 p.unlink()
                 print(f"  apagado: {c}")

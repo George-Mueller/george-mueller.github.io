@@ -18,3 +18,7 @@ desktop.ini
 __pycache__/
 *.pyc
 .env
+
+# Teste de fontes do hero (local, não publicar)
+teste_fontes.html
+teste_fontes/
