@@ -10,6 +10,7 @@
         "webm": "assets/previas/linhameta.webm?v=202611160659"
       },
       "link": "https://youtube.com/shorts/_L6373hvfHw",
+      "plataforma": "youtube",
       "descricao": "Peça autoral: motion graphics, tipografia animada e acabamento.",
       "ordem": 1,
       "destaque_home": true,
@@ -26,6 +27,7 @@
         "webm": "assets/previas/jorginho-ep02.webm?v=202611160659"
       },
       "link": "https://youtube.com/shorts/gju-oVim-uw",
+      "plataforma": "youtube",
       "descricao": "Série autoral do canal: roteiro, animação 2D e edição.",
       "ordem": 2,
       "destaque_home": false,
@@ -42,6 +44,7 @@
         "webm": "assets/previas/jorginho-ep03.webm?v=202611160659"
       },
       "link": "https://youtube.com/shorts/Ov5_gLlFXJ4",
+      "plataforma": "youtube",
       "descricao": "Série autoral do canal: roteiro, animação 2D e edição.",
       "ordem": 3,
       "destaque_home": true,
@@ -58,6 +61,7 @@
         "webm": "assets/previas/vsl-memoria.webm?v=202611160659"
       },
       "link": "https://youtu.be/0K-Tp2hwm1I",
+      "plataforma": "youtube",
       "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
       "ordem": 4,
       "destaque_home": true,
@@ -71,6 +75,7 @@
       "thumb": "assets/thumbs/vsl-memoria-2.webp",
       "previa": null,
       "link": "https://youtu.be/vpVaCOtmCrA",
+      "plataforma": "youtube",
       "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
       "ordem": 5,
       "destaque_home": false,
@@ -84,8 +89,23 @@
       "thumb": "assets/thumbs/vsl-emagrecimento.webp",
       "previa": null,
       "link": "https://youtu.be/ZYYVRTV2mrA",
+      "plataforma": "youtube",
       "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
       "ordem": 6,
+      "destaque_home": false,
+      "ativo": true,
+      "vertical": false
+    },
+    {
+      "id": "vsl-emagrecimento-2",
+      "titulo": "VSL Emagrecimento 2 (trecho)",
+      "nicho": "vsl",
+      "thumb": "assets/thumbs/vsl-emagrecimento-2.webp?v=202611161115",
+      "previa": null,
+      "link": "https://drive.google.com/file/d/1jU8vyAjXvglCbNGCxfFJHQEYCIDln2Jc/view",
+      "plataforma": "drive",
+      "descricao": "Trecho de VSL: edição, ritmo e motion pensados para reter até a oferta.",
+      "ordem": 7,
       "destaque_home": false,
       "ativo": true,
       "vertical": false

@@ -233,11 +233,19 @@
   const modal = $("modal");
   const caixaVideo = $("modal-video");
 
+  // ID de um arquivo do Google Drive (…/file/d/<ID>/view ou ?id=<ID>)
+  const idDrive = (link) => {
+    if (!preenchido(link) || !/drive\.google\.com/.test(link)) return null;
+    return (link.match(/\/file\/d\/([\w-]{20,})/) || link.match(/[?&]id=([\w-]{20,})/) || [])[1] || null;
+  };
+
   const urlEmbed = (link) => {
     if (!preenchido(link)) return null;
     let u;
     try { u = new URL(link); } catch { return null; }
     const host = u.hostname.replace(/^www\.|^m\./, "");
+    const drive = idDrive(link);
+    if (drive) return `https://drive.google.com/file/d/${drive}/preview`;
     if (host === "youtu.be") return `https://www.youtube-nocookie.com/embed/${u.pathname.slice(1)}?autoplay=1&rel=0`;
     if (host.endsWith("youtube.com")) {
       const id = u.searchParams.get("v") || (u.pathname.match(/\/(?:embed|shorts|live)\/([\w-]+)/) || [])[1];
@@ -255,9 +263,43 @@
   function abrirModal(t) {
     document.querySelectorAll(".card.tocando").forEach(parar);
     caixaVideo.innerHTML = "";
-    modal.classList.toggle("vertical", t.vertical !== false);
+    modal.querySelectorAll(".modal-alt").forEach((e) => e.remove());
+    const drive = t.plataforma === "drive" || (!t.plataforma && idDrive(t.link)) ? idDrive(t.link) : null;
+    // Drive: sempre 16:9 (o player do Drive tem barras próprias)
+    modal.classList.toggle("vertical", !drive && t.vertical !== false);
     const embed = urlEmbed(t.link);
-    if (embed) {
+    if (embed && drive) {
+      // Google Drive: iframe /preview + plano B (botão para abrir no Drive) se não carregar
+      const f = document.createElement("iframe");
+      f.src = embed; f.title = t.titulo;
+      f.allow = "autoplay; fullscreen";
+      f.allowFullscreen = true;
+      const planoB = document.createElement("div");
+      planoB.className = "modal-planob"; planoB.hidden = true;
+      const p = document.createElement("p");
+      p.textContent = "O player do Google Drive não carregou aqui.";
+      const a = document.createElement("a");
+      a.className = "botao botao-primario"; a.target = "_blank"; a.rel = "noopener";
+      a.href = `https://drive.google.com/file/d/${drive}/view`;
+      a.textContent = "Assistir no Google Drive";
+      planoB.append(p, a);
+      const mostrarPlanoB = () => { if (f.isConnected) { planoB.hidden = false; f.remove(); alt.remove(); } };
+      // o iframe dispara "load" até com página de erro, então a checagem é por uma sonda:
+      // a miniatura do arquivo só vem como imagem se o Drive responder e o arquivo for público
+      let ok = false;
+      const sonda = new Image();
+      sonda.referrerPolicy = "no-referrer";
+      sonda.onload = () => { ok = sonda.naturalWidth > 0; if (!ok) mostrarPlanoB(); };
+      sonda.onerror = mostrarPlanoB;
+      sonda.src = `https://drive.google.com/thumbnail?id=${drive}&sz=w64`;
+      setTimeout(() => { if (!ok) mostrarPlanoB(); }, 10000);
+      // link discreto, sempre visível, para quem não conseguir tocar dentro do site
+      const alt = document.createElement("a");
+      alt.className = "modal-alt"; alt.target = "_blank"; alt.rel = "noopener";
+      alt.href = a.href; alt.textContent = "Não tocou? Assistir no Google Drive ↗";
+      caixaVideo.append(f, planoB);
+      modal.querySelector(".modal-info").append(alt);
+    } else if (embed) {
       const f = document.createElement("iframe");
       f.src = embed; f.title = t.titulo;
       f.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
@@ -279,7 +321,7 @@
     $("modal-desc").textContent = preenchido(t.descricao) ? t.descricao : "";
     modal.showModal();
   }
-  modal.addEventListener("close", () => { caixaVideo.innerHTML = ""; });
+  modal.addEventListener("close", () => { caixaVideo.innerHTML = ""; modal.querySelectorAll(".modal-alt").forEach((e) => e.remove()); });
   $("modal-fechar").addEventListener("click", () => modal.close());
   modal.addEventListener("click", (e) => { if (e.target === modal) modal.close(); });
 

@@ -253,6 +253,14 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
   position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 1; margin: 0;
   padding: 8px 12px; border-radius: 10px; background: rgba(var(--fundo-rgb), .75); font-size: .85rem; color: var(--texto-2);
 }
+/* Google Drive: plano B quando o player não carrega */
+.modal-planob {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; padding: 24px; text-align: center; background: var(--superficie);
+}
+.modal-planob[hidden] { display: none; }
+.modal-planob p { margin: 0; color: var(--texto-2); }
+.modal-alt { display: inline-block; margin-top: 12px; font-size: .85rem; color: var(--link); }
 .modal-info { padding: 20px 22px 24px; }
 .modal-info h3 { font-size: 1.5rem; margin-bottom: 8px; }
 .modal-info p { margin: 0; color: var(--texto-2); }

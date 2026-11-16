@@ -13,6 +13,13 @@
 
   python ferramentas/adicionar_trabalho.py --link "https://youtu.be/XXXX" [--nicho vsl] [--titulo "..."]
 
+2b) Só com o link do Google Drive (para vídeo que o YouTube bloqueou; arquivo como
+   "qualquer pessoa com o link"): título = nome do arquivo (ou --titulo), thumb pela
+   thumbnail do Drive (sem faixas pretas), sem prévia. Com VIDEO local, a thumb e a prévia
+   saem do vídeo, como no modo 1.
+
+  python ferramentas/adicionar_trabalho.py --link "https://drive.google.com/file/d/ID/view" --nicho vsl
+
 3) Gerar depois a prévia de um trabalho que já existe (mantém título, link etc.):
 
   python ferramentas/adicionar_trabalho.py VIDEO --id vsl-memoria --substituir [--manter-thumb]
@@ -243,6 +250,9 @@ def limpar_link(link: str) -> str:
             return f"https://youtube.com/shorts/{m.group(2)}"
         vid = (q.get("v") or [None])[0] or (m.group(2) if m else None)
         return f"https://youtu.be/{vid}" if vid else link
+    if host == "drive.google.com":
+        vid = id_drive(link)
+        return f"https://drive.google.com/file/d/{vid}/view" if vid else link
     if host.endswith("vimeo.com"):
         h = (q.get("h") or [None])[0]
         return f"https://vimeo.com{u.path}" + (f"?h={h}" if h else "")
@@ -252,6 +262,70 @@ def limpar_link(link: str) -> str:
 def id_youtube(link: str) -> str | None:
     m = re.search(r"(?:youtu\.be/|/shorts/|[?&]v=|/embed/)([\w-]{11})", link)
     return m.group(1) if m else None
+
+
+def id_drive(link: str) -> str | None:
+    """ID de um arquivo do Google Drive (…/file/d/<ID>/view, …/open?id=<ID>, …/uc?id=<ID>)."""
+    if "drive.google.com" not in link:
+        return None
+    m = re.search(r"/file/d/([\w-]{20,})", link) or re.search(r"[?&]id=([\w-]{20,})", link)
+    return m.group(1) if m else None
+
+
+def plataforma_do(link: str) -> str | None:
+    if id_drive(link):
+        return "drive"
+    if id_youtube(link):
+        return "youtube"
+    return None
+
+
+def titulo_drive(vid: str) -> str | None:
+    """Nome do arquivo no Drive (sem extensão); só funciona se o arquivo estiver público."""
+    try:
+        req = urllib.request.Request(f"https://drive.google.com/file/d/{vid}/preview",
+                                     headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            html = r.read().decode("utf-8", "replace")
+    except Exception as e:
+        print(f"  Aviso: o Drive não respondeu ({e}). O arquivo está como 'qualquer pessoa com o link'?")
+        return None
+    m = re.search(r"<title>(.*?) - Google Drive</title>", html)
+    if not m:
+        print("  Aviso: o Drive não mostrou o nome do arquivo (privado?). Informe --titulo.")
+        return None
+    import html as _html
+    return re.sub(r"\.(mp4|mov|m4v|mkv|webm|avi)$", "", _html.unescape(m.group(1)), flags=re.I).strip()
+
+
+def thumb_do_drive(vid: str, saida: Path) -> bool | None:
+    """Baixa a thumbnail do Drive, tira faixas pretas (cropdetect) e salva em .webp.
+    Devolve True se for vertical, False se horizontal, None se falhou."""
+    try:
+        req = urllib.request.Request(f"https://drive.google.com/thumbnail?id={vid}&sz=w1280",
+                                     headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            if not r.headers.get("Content-Type", "").startswith("image/"):
+                raise ValueError("resposta não é imagem (arquivo privado?)")
+            dados = r.read()
+    except Exception as e:
+        print(f"  Aviso: thumb do Drive indisponível ({e}).")
+        return None
+    tmp = saida.with_suffix(".tmp.jpg")
+    tmp.write_bytes(dados)
+    det = subprocess.run([FFMPEG, "-hide_banner", "-loop", "1", "-i", str(tmp), "-t", "0.2",
+                          "-vf", "cropdetect=limit=24:round=2:reset=0", "-f", "null", "-"],
+                         capture_output=True, text=True, encoding="utf-8", errors="replace")
+    achados = re.findall(r"crop=(\d+):(\d+):(\d+):(\d+)", det.stderr)
+    w, h, x, y = map(int, achados[-1]) if achados else (0, 0, 0, 0)
+    recorte = f"crop={w}:{h}:{x}:{y}," if w and h else ""
+    vertical = h > w if w and h else False
+    escala = "scale=-2:960:flags=lanczos" if vertical else "scale=960:-2:flags=lanczos"
+    rodar([FFMPEG, "-hide_banner", "-y", "-i", str(tmp), *SEM_METADADOS,
+           "-vf", f"{recorte}{escala}", "-c:v", "libwebp", "-quality", "80", str(saida)])
+    tmp.unlink()
+    print(f"  thumb do Drive ({w}x{h} sem faixas): {saida.stat().st_size / 1024:.0f} KB")
+    return vertical
 
 
 def oembed(link: str) -> dict | None:
@@ -329,7 +403,8 @@ def main() -> None:
 
     # informações do YouTube (título, formato) quando houver link
     info = oembed(link) if link and id_youtube(link) else None
-    titulo = a.titulo or (info or {}).get("title")
+    drive = id_drive(link) if link else None
+    titulo = a.titulo or (info or {}).get("title") or (titulo_drive(drive) if drive and not a.id else None)
     if not (a.id or titulo):
         sys.exit("Erro: informe --titulo ou --id (ou um --link do YouTube público para pegar o título).")
     ident = slug(a.id or titulo)
@@ -386,11 +461,18 @@ def main() -> None:
             thumb_rel = f"assets/thumbs/{thumb.name}?v={VERSAO}"
         previa = {"mp4": f"assets/previas/{mp4.name}?v={VERSAO}", "webm": f"assets/previas/{webm.name}?v={VERSAO}"}
     elif not thumb_rel:
-        vid = id_youtube(link)
-        if not vid:
-            sys.exit("Erro: sem vídeo local, o link precisa ser do YouTube (para baixar a thumb).")
-        if thumb_do_youtube(vid, bool(vertical), thumb):
-            thumb_rel = f"assets/thumbs/{thumb.name}?v={VERSAO}"
+        if id_drive(link):
+            v = thumb_do_drive(id_drive(link), thumb)
+            if v is not None:
+                thumb_rel = f"assets/thumbs/{thumb.name}?v={VERSAO}"
+                if vertical is None:
+                    vertical = v
+        else:
+            vid = id_youtube(link)
+            if not vid:
+                sys.exit("Erro: sem vídeo local, o link precisa ser do YouTube ou do Google Drive (para baixar a thumb).")
+            if thumb_do_youtube(vid, bool(vertical), thumb):
+                thumb_rel = f"assets/thumbs/{thumb.name}?v={VERSAO}"
 
     destaque = a.destaque or bool(base.get("destaque_home"))
     if a.destaque:  # só um destaque por nicho
@@ -405,6 +487,7 @@ def main() -> None:
         "thumb": thumb_rel,
         "previa": previa,
         "link": link,
+        "plataforma": plataforma_do(link) or base.get("plataforma"),
         "descricao": a.descricao if a.descricao is not None else base.get("descricao", ""),
         "ordem": base.get("ordem") or max((t.get("ordem", 0) for t in lista), default=0) + 1,
         "destaque_home": destaque,
