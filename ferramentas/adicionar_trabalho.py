@@ -81,6 +81,9 @@ FFMPEG = achar_bin("ffmpeg")
 FFPROBE = achar_bin("ffprobe")
 # sem metadados do original (título, ferramenta, datas...) nos arquivos publicados
 SEM_METADADOS = ["-map_metadata", "-1", "-map_chapters", "-1", "-fflags", "+bitexact"]
+# cor padrão de vídeo web: BT.709, faixa limitada ("tv"). Fontes "full range" (ex.: Remotion, yuvj420p)
+# geram prévias que não atualizam a imagem na decodificação por hardware de alguns navegadores.
+COR_WEB = ["-color_range", "tv", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709"]
 
 
 def rodar(cmd: list[str]) -> subprocess.CompletedProcess:
@@ -162,8 +165,8 @@ def filtro_escala(w: int, h: int) -> str:
     curto = min(w, h)
     alvo = min(720, curto - curto % 2)
     if w >= h:
-        return f"scale=-2:{alvo}:flags=lanczos"
-    return f"scale={alvo}:-2:flags=lanczos"
+        return f"scale=-2:{alvo}:flags=lanczos:out_color_matrix=bt709:out_range=tv"
+    return f"scale={alvo}:-2:flags=lanczos:out_color_matrix=bt709:out_range=tv"
 
 
 def gerar_mp4(video: Path, ini: float, dur: float, escala: str, saida: Path) -> None:
@@ -171,7 +174,7 @@ def gerar_mp4(video: Path, ini: float, dur: float, escala: str, saida: Path) -> 
         rodar([
             FFMPEG, "-hide_banner", "-y", "-ss", f"{ini}", "-t", f"{dur}", "-i", str(video),
             *SEM_METADADOS, "-an", "-vf", f"{escala},fps=30", "-c:v", "libx264", "-crf", str(crf),
-            "-preset", "veryfast", "-profile:v", "high", "-pix_fmt", "yuv420p",
+            "-preset", "veryfast", "-profile:v", "high", "-pix_fmt", "yuv420p", *COR_WEB,
             "-movflags", "+faststart", str(saida),
         ])
         if saida.stat().st_size < LIMITE_BYTES:
@@ -186,7 +189,7 @@ def gerar_webm(video: Path, ini: float, dur: float, escala: str, saida: Path) ->
         rodar([
             FFMPEG, "-hide_banner", "-y", "-ss", f"{ini}", "-t", f"{dur}", "-i", str(video),
             *SEM_METADADOS, "-an", "-vf", f"{escala},fps=30", "-c:v", "libvpx-vp9", "-crf", str(crf),
-            "-b:v", "0", "-deadline", "good", "-cpu-used", "4", "-row-mt", "1", "-pix_fmt", "yuv420p",
+            "-b:v", "0", "-deadline", "good", "-cpu-used", "4", "-row-mt", "1", "-pix_fmt", "yuv420p", *COR_WEB,
             str(saida),
         ])
         if saida.stat().st_size < LIMITE_BYTES:
