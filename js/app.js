@@ -18,9 +18,8 @@
 
   $("ano").textContent = new Date().getFullYear();
 
-  /* ---------- Fundo aurora no hero (js/fundos.js) ---------- */
-  const hero = document.querySelector(".hero");
-  if (hero && window.FundoHero) window.FundoHero.montar(hero);
+  /* ---------- Fundo aurora em tela cheia, atrás de tudo (js/fundos.js) ---------- */
+  if (window.FundoSite) window.FundoSite.montar();
 
   /* ---------- Foto (só se existir assets/eu/foto.webp) ---------- */
 

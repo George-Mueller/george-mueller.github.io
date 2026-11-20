@@ -1,10 +1,12 @@
-/* Fundo animado do hero: shader WebGL próprio (aurora/fumaça), sem dependências.
-   Uso: FundoHero.montar(elementoDoHero) -> controle { destruir(), estado }
-   - pausa quando a aba fica oculta ou o hero sai da tela;
+/* Fundo animado do site: shader WebGL próprio (aurora/fumaça), sem dependências.
+   Uso: FundoSite.montar() -> controle { destruir(), estado }
+   - um canvas fixo em tela cheia, atrás de todo o conteúdo (o conteúdo rola por cima);
+   - manchas de luz que passeiam devagar por várias regiões da tela + fumaça fbm;
    - resolução reduzida (1/2 no desktop, 1/3 no celular) e no máximo ~30 fps;
-   - mesma velocidade e variação para todos, inclusive com prefers-reduced-motion (movimento lento, de fundo);
-   - se o WebGL falhar, fica o degradê estático do CSS (.hero sem a classe .com-fundo).
-   O estado fica em data-estado no .hero-fundo e em FundoHero.atual.estado (para diagnóstico). */
+   - mesma velocidade para todos, inclusive com prefers-reduced-motion (movimento lento, de fundo);
+   - pausa só quando a aba fica oculta (o fundo está sempre visível);
+   - se o WebGL falhar, fica o degradê estático em tela cheia do CSS (.fundo-site.estatico).
+   O estado fica em data-estado no .fundo-site e em FundoSite.atual.estado (para diagnóstico). */
 (() => {
   "use strict";
 
@@ -33,20 +35,29 @@ float fbm(vec2 p){
   for (int i = 0; i < 5; i++) { v += a * noise(p); p = r * p * 2. + 3.1; a *= .5; }
   return v;
 }
+// mancha de luz que passeia devagar (Lissajous) por uma área da tela
+float mancha(vec2 p, vec2 tela, vec2 base, vec2 amp, vec2 fr, float fase, float t, float raio){
+  vec2 c = tela * (base + amp * vec2(sin(t * fr.x + fase), cos(t * fr.y + fase * 1.7)));
+  return smoothstep(raio, 0., length(p - c));
+}
 void main(){
   float lado = max(uRes.x, uRes.y);
   vec2 p = gl_FragCoord.xy / lado;
-  vec2 canto = uRes / lado;                       // canto superior direito
+  vec2 tela = uRes / lado;                        // tamanho da tela na mesma escala de p
   float t = uT * .035;
   vec2 q = vec2(fbm(p * 2.2 + vec2(0., t)), fbm(p * 2.2 + vec2(5.2, -t * .8)));
   float n = fbm(p * 1.8 + 1.9 * q + vec2(t * .5, -t * .35));
-  float d = length((p - canto) * vec2(.8, 1.));
-  float luz = smoothstep(1.15, .0, d);            // some antes da borda oposta
+  // três manchas em regiões diferentes, com ritmos diferentes; a fumaça deforma a borda delas
+  vec2 pw = p + (q - .5) * .18;
+  float luz = mancha(pw, tela, vec2(.78, .80), vec2(.20, .16), vec2(.55, .43), 0.0, t, .62)
+            + mancha(pw, tela, vec2(.22, .45), vec2(.18, .24), vec2(.37, .61), 2.1, t, .56)
+            + mancha(pw, tela, vec2(.62, .15), vec2(.26, .12), vec2(.47, .33), 4.4, t, .52);
+  luz = 1. - exp(-1.25 * luz);                    // soma suave: manchas que se cruzam não estouram
   float fumaca = smoothstep(.28, .9, n);
   vec3 c = uFundo;
-  c = mix(c, uFundo2, luz * .9);
-  c = mix(c, uMeio, fumaca * luz * .62);
-  c += uLuz * pow(fumaca * luz, 3.) * .22;
+  c = mix(c, uFundo2, luz * .85);
+  c = mix(c, uMeio, fumaca * luz * .50);
+  c += uLuz * pow(fumaca * luz, 3.) * .14;
   c += (hash(gl_FragCoord.xy + fract(uT)) - .5) / 255.;   // dithering contra banding
   gl_FragColor = vec4(c, 1.);
 }`;
@@ -94,6 +105,7 @@ void main(){
       gl.uniform1f(U.uT, tAnim);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
+    // o .fundo-site tem altura 100lvh: a barra do navegador do celular aparecer/sumir não redimensiona
     const ro = new ResizeObserver(() => { medir(); desenhar(performance.now()); });
     ro.observe(el);
     cv.addEventListener("webglcontextlost", (e) => e.preventDefault());
@@ -107,19 +119,19 @@ void main(){
     };
   }
 
-  function montar(hero) {
+  function montar() {
     const el = document.createElement("div");
-    el.className = "hero-fundo";
+    el.className = "fundo-site";
     el.setAttribute("aria-hidden", "true");
-    hero.prepend(el);
+    document.body.prepend(el);
+    document.body.classList.add("com-fundo");
 
     const ctl = { estado: "carregando", destruir() {} };
-    let fx = null, visivelTela = true, raf = 0;
+    let fx = null, raf = 0;
     const loop = (agora) => { fx.quadro(agora); raf = requestAnimationFrame(loop); };
     const marcar = (e) => { ctl.estado = e; el.dataset.estado = e; };
     const atualizar = () => {
-      if (!fx) return;
-      if (visivelTela && !document.hidden) {
+      if (!document.hidden) {
         if (!raf) { fx.retomar(performance.now()); raf = requestAnimationFrame(loop); }
         marcar("rodando");
       } else {
@@ -127,31 +139,27 @@ void main(){
         marcar("pausado");
       }
     };
-    const io = new IntersectionObserver(([e]) => { visivelTela = e.isIntersecting; atualizar(); });
 
     try {
       fx = criarAurora(el);
     } catch (err) {
       console.warn("[fundo] usando degradê estático:", err.message || err);
-      el.remove();
-      ctl.estado = "fallback estático (sem WebGL)";
-      hero.dataset.fundo = ctl.estado;
+      el.classList.add("estatico", "visivel");
+      marcar("fallback estático (sem WebGL)");
       return ctl;
     }
-    hero.classList.add("com-fundo");
     requestAnimationFrame(() => el.classList.add("visivel"));
-    io.observe(hero);
     document.addEventListener("visibilitychange", atualizar);
+    atualizar();
     ctl.destruir = () => {
-      io.disconnect();
       document.removeEventListener("visibilitychange", atualizar);
       cancelAnimationFrame(raf);
       fx.destruir();
       el.remove();
-      hero.classList.remove("com-fundo");
+      document.body.classList.remove("com-fundo");
     };
     return ctl;
   }
 
-  window.FundoHero = { montar: (hero) => (window.FundoHero.atual = montar(hero)), atual: null };
+  window.FundoSite = { montar: () => (window.FundoSite.atual = montar()), atual: null };
 })();

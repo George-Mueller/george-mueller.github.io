@@ -4,15 +4,17 @@
   --fonte-titulo: "Space Grotesk", system-ui, sans-serif;
   --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --gutter: 16px;
+  --veu: .5;   /* camada escura sobre a aurora fora do hero (fração do --fundo) */
   color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; -webkit-text-size-adjust: 100%; background: var(--fundo); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+/* o fundo da página fica no html: o body é transparente para a aurora fixa (z-index -1) aparecer */
 body {
   margin: 0;
-  background: var(--fundo);
+  background: transparent;
   color: var(--texto);
   font: 400 1rem/1.65 var(--fonte);
   -webkit-font-smoothing: antialiased;
@@ -68,7 +70,7 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
 .botao-primario:hover, .botao-whats:hover { background: var(--destaque-hover); box-shadow: 0 8px 28px rgba(var(--destaque-rgb), .35); }
 .botao-contorno { border-color: var(--borda); background: var(--superficie); color: var(--texto); }
 .botao-contorno:hover { border-color: var(--borda-forte); color: var(--link); }
-.hero-acoes .botao-whats { background: rgba(var(--fundo-rgb), .35); color: var(--link); border-color: rgba(var(--link-rgb), .5); }
+.hero-acoes .botao-whats { background: rgba(var(--fundo-rgb), .45); color: var(--link); border-color: rgba(var(--link-rgb), .5); }
 .hero-acoes .botao-whats:hover { background: rgba(var(--link-rgb), .1); box-shadow: none; }
 .botao-grande { min-height: 56px; padding: 14px 28px; font-size: 1.05rem; }
 
@@ -77,6 +79,8 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
   position: relative; overflow: hidden;
   min-height: 100svh; display: flex; align-items: center;
   padding: 96px 0 64px;
+}
+body:not(.com-fundo) .hero {   /* sem JS: brilho estático no canto */
   /* elipse do tamanho do hero: some a ~70% do raio, antes da borda de baixo */
   background:
     radial-gradient(ellipse 115% 125% at 100% 0%,
@@ -86,6 +90,17 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
       rgba(var(--brilho-rgb), .05) 52%,
       rgba(var(--brilho-rgb), .012) 64%,
       rgba(var(--brilho-rgb), 0) 72%) var(--fundo);
+}
+/* hero: aurora na intensidade cheia; embaixo, emenda suave com o véu das seções */
+.com-fundo .hero::after {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 22%; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(var(--fundo-rgb), 0), rgba(var(--fundo-rgb), var(--veu)));
+}
+/* texto menor do hero: sombra escura suave atrás (contraste ≥ 4.5:1 mesmo com a luz passando) */
+.com-fundo .veu-texto { position: relative; isolation: isolate; width: fit-content; --veu-alfa: .6; }
+.com-fundo .veu-texto::before {
+  content: ""; position: absolute; inset: -36px -44px; z-index: -1; pointer-events: none;
+  background: rgba(var(--fundo-rgb), var(--veu-alfa)); border-radius: 48px; filter: blur(14px);
 }
 .hero-inner { position: relative; z-index: 1; }
 .sobretitulo {
@@ -113,13 +128,10 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
 .hero-linha strong { color: var(--texto); font-weight: 600; }
 .hero-acoes { display: flex; flex-wrap: wrap; gap: 12px; }
 
-/* ---------- Seções (brilhos fracos alternando os lados) ---------- */
+/* ---------- Seções: transparentes sobre a aurora, com o véu escuro para o texto ---------- */
 .secao { position: relative; padding: 80px 0; background-repeat: no-repeat; }
 @media (min-width: 900px) { .secao { padding: 120px 0; } }
-/* centros no meio da altura e raio ≤ 50%: o brilho some antes das bordas da seção */
-#sobre     { background-image: radial-gradient(ellipse 60% 55% at 0% 50%,   rgba(var(--brilho-rgb), .16), rgba(var(--brilho-rgb), .05) 40%, transparent 70%); }
-#portfolio { background-image: radial-gradient(ellipse 60% 50% at 100% 45%, rgba(var(--brilho-rgb), .12), rgba(var(--brilho-rgb), .04) 40%, transparent 70%); }
-#contato   { background-image: radial-gradient(ellipse 65% 60% at 0% 55%,   rgba(var(--brilho-rgb), .20), rgba(var(--brilho-rgb), .06) 40%, transparent 70%); }
+.com-fundo .secao, .com-fundo .rodape, .com-fundo[data-pagina="trabalhos"] main { background-color: rgba(var(--fundo-rgb), var(--veu)); }
 
 .titulo-secao {
   display: flex; align-items: baseline; gap: 14px;
@@ -266,27 +278,30 @@ h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.05; margin: 0; let
 .modal-info p { margin: 0; color: var(--texto-2); }
 .modal-info .modal-cat { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 6px; }
 
-/* ---------- Fundo animado do hero (js/fundos.js) ---------- */
-.hero-fundo {
-  position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+/* ---------- Fundo animado do site (js/fundos.js): fixo, tela cheia, atrás de tudo ---------- */
+.fundo-site {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh;
+  z-index: -1; pointer-events: none; overflow: hidden;
   opacity: 0; transition: opacity 1.2s ease;
   background: var(--fundo);
 }
-.hero-fundo.visivel { opacity: 1; }
-.hero-fundo canvas { width: 100%; height: 100%; display: block; }
-/* esmaece embaixo para emendar sem borda com a próxima seção */
-.hero-fundo::after {
-  content: ""; position: absolute; inset: auto 0 0 0; height: 28%;
-  background: linear-gradient(to bottom, rgba(var(--fundo-rgb), 0), var(--fundo));
+.fundo-site.visivel { opacity: 1; }
+.fundo-site canvas { width: 100%; height: 100%; display: block; }
+/* sem WebGL: degradê estático em tela cheia, com luz em mais de uma região */
+.fundo-site.estatico {
+  background:
+    radial-gradient(ellipse 60% 55% at 88% 8%,  rgba(var(--brilho-rgb), .30), rgba(var(--brilho-rgb), .08) 45%, transparent 72%),
+    radial-gradient(ellipse 55% 50% at 8% 55%,  rgba(var(--brilho-rgb), .18), rgba(var(--brilho-rgb), .05) 45%, transparent 72%),
+    radial-gradient(ellipse 60% 45% at 75% 95%, rgba(var(--brilho-rgb), .16), rgba(var(--brilho-rgb), .04) 45%, transparent 72%),
+    var(--fundo);
 }
-.hero.com-fundo { background: var(--fundo); }
 
 /* ---------- Home: um destaque por nicho / página de trabalhos ---------- */
 .secao-intro { color: var(--texto-2); margin: -12px 0 28px; max-width: 60ch; }
 @media (min-width: 1100px) { .grade-home { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .ver-mais { margin-top: 36px; display: flex; justify-content: center; }
 .pagina-topo { padding-top: 120px; padding-bottom: 8px; }
-.topo-trabalhos { background: radial-gradient(ellipse 75% 100% at 100% 0%, rgba(var(--brilho-rgb), .30), rgba(var(--brilho-rgb), .08) 45%, transparent 72%); }
+body:not(.com-fundo) .topo-trabalhos { background: radial-gradient(ellipse 75% 100% at 100% 0%, rgba(var(--brilho-rgb), .30), rgba(var(--brilho-rgb), .08) 45%, transparent 72%); }
 .pagina-topo h1 { font-size: clamp(2.8rem, 11vw, 6rem); text-transform: uppercase; letter-spacing: -0.04em; }
 .pagina-topo p { color: var(--texto-2); max-width: 56ch; margin: 18px 0 0; }
 .filtros-nicho { position: sticky; top: 60px; z-index: 40; padding: 12px 0; margin: 24px 0 0;
