@@ -1,0 +1,8 @@
+#!/bin/sh
+# Atualiza o ?v=<hash> dos CSS/JS no index.html e na trabalhos.html e inclui as páginas no commit.
+# Ativar uma vez por clone: git config core.hooksPath .githooks
+cd "$(git rev-parse --show-toplevel)" || exit 1
+PY=python; command -v "$PY" >/dev/null 2>&1 || PY=py
+"$PY" ferramentas/versionar_assets.py || exit 1
+git diff --quiet -- index.html trabalhos.html || git add index.html trabalhos.html
+exit 0

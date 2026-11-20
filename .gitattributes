@@ -1,0 +1,2 @@
+# Hooks rodam no sh: sempre LF
+.githooks/* text eol=lf
