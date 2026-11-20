@@ -109,6 +109,20 @@
       "destaque_home": true,
       "ativo": true,
       "vertical": true
+    },
+    {
+      "id": "legenda-nao-e-enfeite-reel",
+      "titulo": "Legenda não é enfeite — Reel",
+      "nicho": "motion",
+      "thumb": "assets/thumbs/legenda-nao-e-enfeite-reel.webp?v=202611200928",
+      "previa": null,
+      "link": "https://youtube.com/shorts/VWXhyJc38kM",
+      "plataforma": "youtube",
+      "descricao": "Reel em tipografia cinética: cada palavra no ritmo da voz, com demonstração de antes e depois da legenda.",
+      "ordem": 9,
+      "destaque_home": false,
+      "ativo": true,
+      "vertical": true
     }
   ]
 }
