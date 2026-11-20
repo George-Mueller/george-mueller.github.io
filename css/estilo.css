@@ -128,6 +128,51 @@ body:not(.com-fundo) .hero {   /* sem JS: brilho estático no canto */
 .hero-linha strong { color: var(--texto); font-weight: 600; }
 .hero-acoes { display: flex; flex-wrap: wrap; gap: 12px; }
 
+/* vídeo de apresentação (js/apresentacao.js): celular = 9:16 abaixo do nome, centralizado, até ~70% da altura;
+   desktop (≥ 900px) = 16:9 à direita do nome. Moldura arredondada com borda Jade sutil, como os cards. */
+.hero-video {
+  position: relative; margin: 40px auto 0; overflow: hidden;
+  aspect-ratio: 9 / 16; width: min(100%, calc(70svh * 9 / 16)); max-height: 70svh;
+  border-radius: var(--raio); background: var(--fundo);
+  border: 1px solid rgba(var(--destaque-rgb), .38);
+  box-shadow: 0 0 0 1px rgba(var(--destaque-rgb), .08), 0 18px 60px rgba(0, 0, 0, .45), 0 0 48px rgba(var(--destaque-rgb), .12);
+}
+.hero-video picture, .hero-poster, .hero-video-el { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero-poster, .hero-video-el { object-fit: cover; }
+.hero-video-el { opacity: 0; transition: opacity .4s ease; }
+.hero-video.tocando .hero-video-el { opacity: 1; }
+.hero-video-som, .hero-video-play {
+  position: absolute; z-index: 2; display: grid; place-items: center; cursor: pointer;
+  border-radius: 999px; transition: background .2s, border-color .2s, transform .15s;
+}
+.hero-video-som[hidden], .hero-video-play[hidden] { display: none; }
+.hero-video-som {
+  right: 12px; top: 12px; width: 40px; height: 40px; padding: 0;   /* celular: em cima (embaixo fica o WhatsApp flutuante) */
+  color: var(--texto); background: rgba(var(--fundo-rgb), .62);
+  border: 1px solid rgba(var(--link-rgb), .35);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  opacity: .75;
+}
+.hero-video-som:hover, .hero-video-som:focus-visible { opacity: 1; border-color: var(--link); }
+.hero-video-som svg { width: 20px; height: 20px; }
+.hero-video-som .i-som, .hero-video.com-som .hero-video-som .i-mudo { display: none; }
+.hero-video.com-som .hero-video-som .i-som { display: block; }
+.hero-video-play {
+  left: 50%; top: 50%; width: 68px; height: 68px; padding: 0; transform: translate(-50%, -50%);
+  background: var(--destaque); color: var(--no-destaque); border: 0;
+  box-shadow: 0 8px 28px rgba(var(--destaque-rgb), .35);
+}
+.hero-video-play:hover { background: var(--destaque-hover); transform: translate(-50%, -50%) scale(1.05); }
+.hero-video-play svg { width: 30px; height: 30px; margin-left: 3px; }
+
+@media (min-width: 900px) {
+  .hero .container { max-width: 1400px; }
+  .hero-inner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(32px, 4vw, 72px); }
+  .hero-nome { font-size: clamp(4.4rem, 10.5vw, 10rem); }
+  .hero-video { margin: 0; aspect-ratio: 16 / 9; width: 100%; max-height: none; }
+  .hero-video-som { top: auto; bottom: 12px; }
+}
+
 /* ---------- Seções: transparentes sobre a aurora, com o véu escuro para o texto ---------- */
 .secao { position: relative; padding: 80px 0; background-repeat: no-repeat; }
 @media (min-width: 900px) { .secao { padding: 120px 0; } }

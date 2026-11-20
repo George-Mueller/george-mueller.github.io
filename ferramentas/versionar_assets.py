@@ -1,4 +1,5 @@
-"""Põe ?v=<hash> nos <script src> e <link rel="stylesheet"> locais do index.html e da trabalhos.html.
+"""Põe ?v=<hash> nos <script src> e <link rel="stylesheet"> locais do index.html e da trabalhos.html,
+e nas mídias do vídeo de apresentação do hero (assets/apresentacao/: pôster, mp4, webm).
 
 O hash (8 primeiros caracteres do SHA-1 do conteúdo) só muda quando o arquivo muda, então o navegador
 pega a versão nova logo após o deploy e mantém o cache enquanto nada mudar.
@@ -21,6 +22,8 @@ TAG = re.compile(r"<(script|link)\b[^>]*>", re.I)
 ATRIB = {"script": re.compile(r'(\bsrc=")([^"?#]+)(?:\?v=[^"#]*)?(")', re.I),
          "link": re.compile(r'(\bhref=")([^"?#]+)(?:\?v=[^"#]*)?(")', re.I)}
 ESTILO = re.compile(r'\brel="stylesheet"', re.I)
+# mídias do vídeo de apresentação do hero (pôster e vídeos): src, srcset e data-* que apontam para assets/apresentacao/
+MIDIA = re.compile(r'(\b(?:src|srcset|data-[a-z0-9-]+)=")(assets/apresentacao/[^"?#\s]+)(?:\?v=[^"#]*)?(")', re.I)
 
 
 def hash_de(caminho):
@@ -49,7 +52,18 @@ def versionar(html, mudancas, faltando):
 
         return ATRIB[tipo].sub(atrib, t, count=1)
 
-    return TAG.sub(tag, html)
+    def midia(a):
+        url = a.group(2)
+        arq = RAIZ / url
+        if not arq.is_file():
+            faltando.append(url)
+            return a.group(0)
+        novo = f"{a.group(1)}{url}?v={hash_de(arq)}{a.group(3)}"
+        if novo != a.group(0):
+            mudancas.append(url)
+        return novo
+
+    return MIDIA.sub(midia, TAG.sub(tag, html))
 
 
 def main():
