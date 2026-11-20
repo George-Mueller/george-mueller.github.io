@@ -1,23 +1,6 @@
 {
   "trabalhos": [
     {
-      "id": "linhameta",
-      "titulo": "LinhaMeta",
-      "nicho": "motion",
-      "thumb": "assets/thumbs/linhameta.webp",
-      "previa": {
-        "mp4": "assets/previas/linhameta.mp4?v=202611160659",
-        "webm": "assets/previas/linhameta.webm?v=202611160659"
-      },
-      "link": "https://youtube.com/shorts/_L6373hvfHw",
-      "plataforma": "youtube",
-      "descricao": "Peça autoral: motion graphics, tipografia animada e acabamento.",
-      "ordem": 1,
-      "destaque_home": true,
-      "ativo": true,
-      "vertical": true
-    },
-    {
       "id": "jorginho-ep02",
       "titulo": "Cadê o Jorginho? — Ep. 2",
       "nicho": "canal",
@@ -109,6 +92,23 @@
       "destaque_home": false,
       "ativo": true,
       "vertical": false
+    },
+    {
+      "id": "poupalume",
+      "titulo": "Poupalume — anúncio de app",
+      "nicho": "motion",
+      "thumb": "assets/thumbs/poupalume.webp?v=202611200652",
+      "previa": {
+        "mp4": "assets/previas/poupalume.mp4?v=202611200652",
+        "webm": "assets/previas/poupalume.webm?v=202611200652"
+      },
+      "link": "https://youtube.com/shorts/2ha0fKXupwE",
+      "plataforma": "youtube",
+      "descricao": "Anúncio em motion graphics para app de finanças: tipografia cinética, UI animada e sound design.",
+      "ordem": 8,
+      "destaque_home": true,
+      "ativo": true,
+      "vertical": true
     }
   ]
 }
