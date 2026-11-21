@@ -4,7 +4,7 @@
   // ordem dos nichos na home e na página de trabalhos
   const NICHOS = [
     ["vsl", "VSL"],
-    ["canal", "Canais dark"],
+    ["canal", "Animação 2D"],
     ["motion", "Motion graphics"],
     ["youtube", "YouTube"],
     ["gameplay", "Gameplay"],
