@@ -154,6 +154,23 @@
       "destaque_home": false,
       "ativo": true,
       "vertical": true
+    },
+    {
+      "id": "dois-amigos",
+      "titulo": "Dois amigos, R$ 300 por mês",
+      "nicho": "motion",
+      "thumb": "assets/thumbs/dois-amigos.webp?v=202611221318",
+      "previa": {
+        "mp4": "assets/previas/dois-amigos.mp4?v=202611221318",
+        "webm": "assets/previas/dois-amigos.webm?v=202611221318"
+      },
+      "link": "https://youtu.be/pOBM8yw6GmQ",
+      "plataforma": "youtube",
+      "descricao": "Explicativo de juros compostos em motion graphics: gráficos, contadores e curvas animados no After Effects, com todos os valores ligados a controles editáveis (aporte, taxa e idades recalculam o vídeo inteiro).",
+      "ordem": 7,
+      "destaque_home": false,
+      "ativo": true,
+      "vertical": false
     }
   ]
 }
