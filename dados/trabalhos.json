@@ -2,7 +2,7 @@
   "trabalhos": [
     {
       "id": "jorginho-ep02",
-      "titulo": "Cadê o Jorginho? — Ep. 2",
+      "titulo": "Cadê o Jorginho? · \"Quem sai some\"",
       "nicho": "canal",
       "thumb": "assets/thumbs/jorginho-ep02.webp",
       "previa": {
@@ -19,7 +19,7 @@
     },
     {
       "id": "jorginho-ep03",
-      "titulo": "Cadê o Jorginho? — Ep. 3",
+      "titulo": "Cadê o Jorginho? · \"A foto do futuro\"",
       "nicho": "canal",
       "thumb": "assets/thumbs/jorginho-ep03.webp",
       "previa": {
@@ -126,7 +126,7 @@
     },
     {
       "id": "jorginho-ep04",
-      "titulo": "Cadê o Jorginho? · Ep. 4 \"Debaixo da cama\"",
+      "titulo": "Cadê o Jorginho? · \"Debaixo da cama\"",
       "nicho": "canal",
       "thumb": "assets/thumbs/jorginho-ep04.webp?v=202611210452",
       "previa": {
