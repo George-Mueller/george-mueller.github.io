@@ -193,8 +193,8 @@
       botao("todos", "Todos");
       let i = 0;
       presentes.forEach(([n, rotulo]) => {
-        const doNicho = lista.filter((t) => t.nicho === n)
-          .sort((a, b) => (b.destaque_home === true) - (a.destaque_home === true) || porOrdem(a, b));
+        // só pela ordem do JSON (o destaque da home não vai mais para o topo aqui: o mais novo vem primeiro)
+        const doNicho = lista.filter((t) => t.nicho === n).sort(porOrdem);
         botao(n, rotulo);
         const sec = document.createElement("section");
         sec.className = "nicho"; sec.id = n; sec.dataset.nicho = n;

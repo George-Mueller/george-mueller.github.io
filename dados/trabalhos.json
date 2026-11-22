@@ -12,7 +12,7 @@
       "link": "https://youtube.com/shorts/gju-oVim-uw",
       "plataforma": "youtube",
       "descricao": "Série autoral do canal: roteiro, animação 2D e edição.",
-      "ordem": 3,
+      "ordem": 4,
       "destaque_home": false,
       "ativo": true,
       "vertical": true
@@ -29,7 +29,7 @@
       "link": "https://youtube.com/shorts/Ov5_gLlFXJ4",
       "plataforma": "youtube",
       "descricao": "Série autoral do canal: roteiro, animação 2D e edição.",
-      "ordem": 2,
+      "ordem": 3,
       "destaque_home": false,
       "ativo": true,
       "vertical": true
@@ -136,8 +136,22 @@
       "link": "https://youtube.com/shorts/srWmVElOOTc",
       "plataforma": "youtube",
       "descricao": "Terror narrado em animação 2D: personagens, cenário e animação feitos 100% em código, com trilha e efeitos de suspense.",
-      "ordem": 1,
+      "ordem": 2,
       "destaque_home": true,
+      "ativo": true,
+      "vertical": true
+    },
+    {
+      "id": "jorginho-posto-estrela",
+      "titulo": "Cadê o Jorginho? · \"Posto Estrela\"",
+      "nicho": "canal",
+      "thumb": "assets/thumbs/jorginho-posto-estrela.webp?v=202611220344",
+      "previa": null,
+      "link": "https://youtube.com/shorts/XgRXSP3iCv8",
+      "plataforma": "youtube",
+      "descricao": "Terror narrado em animação 2D vetorial: personagens, cenário e animação feitos 100% em código, com trilha e efeitos de suspense.",
+      "ordem": 1,
+      "destaque_home": false,
       "ativo": true,
       "vertical": true
     }
