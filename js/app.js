@@ -98,7 +98,7 @@
       }, { threshold: 0.6 })
     : null;
 
-  const criarCard = (t, i, { rotuloNicho = true } = {}) => {
+  const criarCard = (t, i, { rotuloNicho = true, previaManual = false } = {}) => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "card" + (t.vertical === false ? " horizontal" : "");
@@ -138,7 +138,8 @@
     info.append(tit);
     card.append(info);
 
-    if (!semHover) {
+    // previaManual: quem decide o card que toca é o carrossel da home
+    if (!semHover && !previaManual) {
       card.addEventListener("mouseenter", () => tocar(card));
       card.addEventListener("mouseleave", () => parar(card));
       card.addEventListener("focus", () => tocar(card));
@@ -153,7 +154,7 @@
       }
       abrirModal(t);
     });
-    if (observador) observador.observe(card);
+    if (observador && !previaManual) observador.observe(card);
     return card;
   };
 
@@ -164,17 +165,222 @@
       .then((r) => r.json())
       .then((d) => (d.trabalhos || []).filter((t) => t.ativo !== false && ROTULO[t.nicho]));
 
-  // HOME: um card por nicho (o marcado destaque_home; se nenhum, o primeiro). Nicho vazio não aparece.
+  // HOME: carrossel com todos os trabalhos ativos
   if (pagina === "home") {
-    const grade = $("grade-home");
-    carregarTrabalhos().then((lista) => {
-      let i = 0;
-      NICHOS.forEach(([n]) => {
-        const doNicho = lista.filter((t) => t.nicho === n).sort(porOrdem);
-        const escolhido = doNicho.find((t) => t.destaque_home) || doNicho[0];
-        if (escolhido) grade.append(criarCard(escolhido, i++));
-      });
-    }).catch(() => { grade.textContent = "Não foi possível carregar os trabalhos."; });
+    const faixa = $("grade-home");
+    carregarTrabalhos().then(montarCarrossel).catch(() => { faixa.textContent = "Não foi possível carregar os trabalhos."; });
+  }
+
+  // Ordem: primeiro o destaque de cada nicho (na ordem dos nichos), depois os demais intercalando nichos.
+  // Desktop (mouse): a faixa tem 3 cópias e anda por transform; a posição "pos" dá a volta a cada cópia (loop).
+  //   Mouse à direita → anda para a esquerda; à esquerda → volta; no centro → para (velocidade com aceleração suave).
+  //   Mouse fora: deriva lenta (sem deriva com movimento reduzido). Setas ‹ › e rolagem horizontal do trackpad.
+  //   Prévia: só a do card parado sob o mouse (ou com foco do teclado).
+  // Celular (toque): rolagem nativa com scroll-snap; a prévia é a do card mais centralizado quando a rolagem para.
+  function montarCarrossel(lista) {
+    const raiz = $("carrossel");
+    const janela = raiz.querySelector(".carrossel-janela");
+    const faixa = $("grade-home");
+    const titulo = raiz.closest("section").querySelector(".titulo-secao");
+    const mqMouse = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+    const destaques = [];
+    const resto = {};
+    NICHOS.forEach(([n]) => {
+      const doNicho = lista.filter((t) => t.nicho === n).sort(porOrdem);
+      const d = doNicho.find((t) => t.destaque_home) || doNicho[0];
+      if (d) destaques.push(d);
+      resto[n] = doNicho.filter((t) => t !== d);
+    });
+    const ordem = [...destaques];
+    for (let achou = true; achou;) {
+      achou = false;
+      NICHOS.forEach(([n]) => { const t = resto[n].shift(); if (t) { ordem.push(t); achou = true; } });
+    }
+    if (!ordem.length) { faixa.textContent = "Nenhum trabalho por enquanto."; return; }
+
+    const DERIVA = reduzirMov ? 0 : 26;   // px/s, para a esquerda
+    const VMAX = 1100;                    // px/s com o mouse na borda
+    const ZONA_MORTA = 0.16;              // fração da metade da faixa, no centro
+    let modo = "", n = ordem.length, cards = [];
+    let pos = 0, vel = 0, pendente = 0, W = 1, base = 0, pad = 0;
+    let mouse = null, sobreSeta = false, visivel = false, raf = 0, ultimo = 0;
+    let ativo = null, candidato = null, desde = 0, timerToque = 0;
+
+    const definirAtivo = (card) => {
+      if (card === ativo) return;
+      if (ativo) parar(ativo);
+      ativo = card;
+      if (card) tocar(card);
+    };
+    // o modal pausa as prévias; ao fechar, o card sob o mouse volta a poder tocar
+    $("modal").addEventListener("close", () => { ativo = null; candidato = null; });
+
+    function montar() {
+      definirAtivo(null);
+      modo = mqMouse.matches ? "mouse" : "toque";
+      raiz.dataset.modo = modo;
+      faixa.style.transform = "";
+      const copias = modo === "mouse" ? [0, 1, 2] : [1];
+      faixa.replaceChildren(...copias.flatMap((k) => ordem.map((t, i) => {
+        const c = criarCard(t, k === 1 ? i : 99, { previaManual: true });
+        if (k !== 1) { c.setAttribute("aria-hidden", "true"); c.tabIndex = -1; }
+        return c;
+      })));
+      cards = [...faixa.children];
+      janela.scrollLeft = 0;
+      pos = 0; vel = 0; pendente = 0;
+      medir();
+      aplicar();
+      iniciar();
+    }
+
+    // altura dos cards + alinhamento com o título; a altura é ajustada para que nunca caiba
+    // um número exato de cards: sempre fica um cortado na borda direita
+    function medir() {
+      const rJ = janela.getBoundingClientRect();
+      pad = Math.max(0, titulo.getBoundingClientRect().left - rJ.left);
+      raiz.style.setProperty("--pad", pad + "px");
+      const vh = window.innerHeight;
+      let alt = modo === "mouse" ? Math.min(420, Math.max(300, vh * 0.5)) : Math.min(380, Math.max(260, vh * 0.48));
+      const ini = modo === "mouse" ? n : 0;
+      const R = janela.clientWidth;
+      for (let k = 0; k < 14; k++) {
+        raiz.style.setProperty("--alt", Math.round(alt) + "px");
+        const x0 = cards[ini].offsetLeft;
+        const ruim = cards.slice(ini, ini + n).some((c) => {
+          const dir = pad + c.offsetLeft - x0 + c.offsetWidth;
+          return dir > R - 72 && dir < R + 28;
+        });
+        if (!ruim) break;
+        alt *= 0.97;
+      }
+      if (modo === "mouse") {
+        W = cards[n].offsetLeft - cards[0].offsetLeft;
+        base = pad - cards[n].offsetLeft;
+      }
+    }
+
+    function aplicar() {
+      if (modo !== "mouse") return;
+      pos = ((pos % W) + W) % W;
+      faixa.style.transform = `translate3d(${(base - pos).toFixed(2)}px,0,0)`;
+    }
+
+    function iniciar() {
+      if (modo === "mouse" && visivel && !document.hidden && !raf) { ultimo = 0; raf = requestAnimationFrame(quadro); }
+      if (modo === "toque") agendarCentro(0);
+    }
+
+    function quadro(t) {
+      raf = 0;
+      const dt = ultimo ? Math.min(0.05, (t - ultimo) / 1000) : 0;
+      ultimo = t;
+      let alvo = DERIVA;
+      if (mouse) {
+        if (sobreSeta) alvo = 0;
+        else {
+          const r = janela.getBoundingClientRect();
+          const x = ((mouse.x - r.left) / r.width) * 2 - 1;
+          const a = Math.min(1, Math.max(0, (Math.abs(x) - ZONA_MORTA) / (1 - ZONA_MORTA)));
+          alvo = Math.sign(x) * a * a * VMAX;
+        }
+      } else if (faixa.contains(document.activeElement)) alvo = 0;
+      vel += (alvo - vel) * (1 - Math.exp(-dt * 3.2));
+      let passo = pendente * (1 - Math.exp(-dt * 6));
+      if (Math.abs(pendente - passo) < 0.5) passo = pendente;
+      pendente -= passo;
+      pos += vel * dt + passo;
+      aplicar();
+      escolherPrevia(t);
+      if (visivel && !document.hidden && modo === "mouse") raf = requestAnimationFrame(quadro);
+    }
+
+    // desktop: toca o card sob o mouse depois de um instante parado ali (rolando rápido não toca,
+    // para não baixar a prévia de cada card que passa)
+    function escolherPrevia(t) {
+      let c = null;
+      if (mouse && !sobreSeta) {
+        const el = document.elementFromPoint(mouse.x, mouse.y);
+        c = el && faixa.contains(el) ? el.closest(".card") : null;
+      } else if (!mouse && document.activeElement?.classList.contains("card") && faixa.contains(document.activeElement)) {
+        c = document.activeElement;
+      }
+      if (c !== candidato) { candidato = c; desde = t; }
+      if (ativo && ativo !== c) definirAtivo(null);
+      if (c && c !== ativo && t - desde > 160 && Math.abs(vel) + Math.abs(pendente) < 320) definirAtivo(c);
+    }
+
+    // celular: quando a rolagem para, toca o card mais perto do centro (não com movimento reduzido:
+    // aí vale o toque duplo dos cards)
+    function agendarCentro(espera) {
+      clearTimeout(timerToque);
+      timerToque = setTimeout(() => {
+        if (modo !== "toque") return;
+        if (!visivel || reduzirMov) { definirAtivo(null); return; }
+        const r = janela.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        let melhor = null, dist = Infinity;
+        cards.forEach((c) => {
+          const rc = c.getBoundingClientRect();
+          const d = Math.abs(rc.left + rc.width / 2 - cx);
+          if (d < dist) { dist = d; melhor = c; }
+        });
+        definirAtivo(melhor);
+      }, espera);
+    }
+    janela.addEventListener("scroll", () => { if (modo === "toque") agendarCentro(140); }, { passive: true });
+
+    // mouse
+    raiz.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse" || modo !== "mouse") return;
+      mouse = { x: e.clientX, y: e.clientY };
+      sobreSeta = !!e.target.closest(".carrossel-seta");
+    });
+    raiz.addEventListener("pointerleave", () => { mouse = null; sobreSeta = false; });
+    raiz.querySelectorAll(".carrossel-seta").forEach((b) => b.addEventListener("click", () => {
+      pendente += Number(b.dataset.dir) * janela.clientWidth * 0.7;
+    }));
+    // trackpad: rolagem horizontal move a faixa (a vertical continua rolando a página)
+    janela.addEventListener("wheel", (e) => {
+      if (modo !== "mouse" || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      pendente += e.deltaX;
+    }, { passive: false });
+    // teclado: o card com foco entra na área visível
+    faixa.addEventListener("focusin", (e) => {
+      if (modo !== "mouse") return;
+      const c = e.target.closest(".card");
+      if (!c) return;
+      janela.scrollLeft = 0;
+      const rJ = janela.getBoundingClientRect(), rc = c.getBoundingClientRect();
+      if (rc.left < rJ.left + pad || rc.right > rJ.right - 40) pendente = rc.left - (rJ.left + pad);
+    });
+
+    // só anima com o carrossel na tela e a aba visível
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([e]) => {
+        visivel = e.isIntersecting;
+        if (visivel) iniciar();
+        else definirAtivo(null);
+      }, { threshold: 0.2 }).observe(raiz);
+    } else visivel = true;
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) iniciar(); else definirAtivo(null); });
+
+    let timerResize = 0;
+    window.addEventListener("resize", () => {
+      clearTimeout(timerResize);
+      timerResize = setTimeout(() => {
+        if ((mqMouse.matches ? "mouse" : "toque") !== modo) { montar(); return; }
+        const fracao = pos / W;
+        medir();
+        pos = fracao * W;
+        aplicar();
+      }, 150);
+    });
+    mqMouse.addEventListener?.("change", montar);
+
+    montar();
   }
 
   // TRABALHOS: todos, agrupados por nicho, com filtro

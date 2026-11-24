@@ -348,7 +348,41 @@ body:not(.com-fundo) .hero {   /* sem JS: brilho estático no canto */
 
 /* ---------- Home: um destaque por nicho / página de trabalhos ---------- */
 .secao-intro { color: var(--texto-2); margin: -12px 0 28px; max-width: 60ch; }
-@media (min-width: 1100px) { .grade-home { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+/* ---------- Home: carrossel com todos os trabalhos ----------
+   modo "mouse" (desktop): faixa em 3 cópias movida por transform (rola pelo mouse, deriva em loop, setas);
+   modo "toque" (celular): rolagem nativa com scroll-snap. --alt e --pad vêm do js/app.js. */
+.carrossel { position: relative; --alt: 380px; --pad: var(--gutter); --gap: 16px; }
+@media (min-width: 720px) { .carrossel { --gap: 20px; } }
+.carrossel-janela { position: relative; overflow: hidden; overflow: clip; padding: 14px 0 34px; margin: -14px 0 -34px; }
+.carrossel-faixa { display: flex; gap: var(--gap); width: max-content; }
+.carrossel[data-modo="mouse"] .carrossel-faixa { will-change: transform; }
+.carrossel[data-modo="mouse"] .carrossel-janela {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+}
+.carrossel .card { flex: none; width: calc(var(--alt) * 9 / 16); height: var(--alt); }
+.carrossel .card.horizontal { width: calc(var(--alt) * 16 / 9); }
+.carrossel .card-midia { height: 100%; aspect-ratio: auto; }
+.carrossel[data-modo="toque"] .carrossel-janela {
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-padding-inline: var(--pad);
+  overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.carrossel[data-modo="toque"] .carrossel-janela::-webkit-scrollbar { display: none; }
+.carrossel[data-modo="toque"] .carrossel-faixa { padding-inline: var(--pad); }
+.carrossel[data-modo="toque"] .card { scroll-snap-align: start; }
+.carrossel[data-modo="toque"] .card.horizontal { width: min(calc(var(--alt) * 16 / 9), calc(100vw - var(--pad) - 100px)); }
+.carrossel-seta {
+  position: absolute; top: calc(50% - 22px); z-index: 2; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; color: var(--texto);
+  background: rgba(var(--fundo-rgb), .6); border: 1px solid var(--borda);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  opacity: .55; transition: opacity .2s, border-color .2s, background .2s;
+}
+.carrossel-seta:hover, .carrossel-seta:focus-visible { opacity: 1; border-color: var(--destaque); background: rgba(var(--fundo-rgb), .85); }
+.carrossel-seta svg { width: 20px; height: 20px; }
+.carrossel-seta.anterior { left: 14px; }
+.carrossel-seta.proxima { right: 14px; }
+.carrossel:not([data-modo="mouse"]) .carrossel-seta { display: none; }
 .ver-mais { margin-top: 36px; display: flex; justify-content: center; }
 .pagina-topo { padding-top: 120px; padding-bottom: 8px; }
 body:not(.com-fundo) .topo-trabalhos { background: radial-gradient(ellipse 75% 100% at 100% 0%, rgba(var(--brilho-rgb), .30), rgba(var(--brilho-rgb), .08) 45%, transparent 72%); }
